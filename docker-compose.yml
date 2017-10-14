@@ -1,0 +1,22 @@
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/web
+    command: sh /web/startup.sh
+    links:
+      - db
+    stdin_open: true
+    environment:
+      - ALLOW_OVERRIDE=true
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_USER=postgres
+      - POSTGRES_URL=db
