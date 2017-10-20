@@ -5,4 +5,7 @@ Rails.application.routes.draw do
   resources :articles, only: [:index, :show]
   #get '/posts', to:'posts#index'
   resources :photos, only: [:index]
+  resources :messages
+  root 'messages#index'
 end
+  
