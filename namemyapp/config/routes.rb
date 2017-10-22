@@ -7,5 +7,9 @@ Rails.application.routes.draw do
   resources :photos, only: [:index]
   resources :messages
   root 'messages#index'
+  #devise_scope :user do
+  #get 'sign_in', to: 'devise/sessions#newp
+  #end
+  devise_for :users, controllers: {registrations: "registrations"}
+
 end
-  

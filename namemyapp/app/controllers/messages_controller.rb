@@ -1,7 +1,12 @@
 class MessagesController < ApplicationController
   def index
     @messages = Message.all
+    if user_signed_in?
+      redirect_to posts_path
+    else
+      redirect_to new_user_session_path
   end
+end
 
   def new
     @message = Message.new
