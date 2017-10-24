@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   #end
-  devise_for :users #, controllers: {registrations: "registrations"}
+  devise_for :users , controllers: {registrations: "registrations"}
 
   authenticated :user do
     root 'users#index'
