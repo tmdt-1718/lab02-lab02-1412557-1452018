@@ -10,6 +10,11 @@ class User < ApplicationRecord
              :case_sensitive => false
            } # etc.
     attr_accessor :login
+
+
+
+
+
     def self.find_for_database_authentication(warden_conditions)
      conditions = warden_conditions.dup
      if login = conditions.delete(:login)
@@ -28,4 +33,12 @@ class User < ApplicationRecord
      end
    end
 
+   after_create :create_default_conversation
+   private
+
+ # for demo purposes
+
+  def create_default_conversation
+    Conversation.create(sender_id: 1, recipient_id: self.id) unless self.id == 1
+  end
 end

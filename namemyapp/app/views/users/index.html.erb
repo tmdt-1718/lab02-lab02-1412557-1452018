@@ -5,7 +5,6 @@
       <div class="panel panel-default">
         <!-- Default panel contents -->
         <div class="panel-heading">Registered Users</div>
-
         <!-- Table -->
         <table class="table">
           <thead>
@@ -22,15 +21,13 @@
                 <td><%= user.name %></td>
                 <td>
                   <%= link_to "Send Message", "#", class: "btn btn-success btn-xs start-conversation",
-                              "data-sid" => current_user.id, "data-rip" => user.id %>
+                  "data-sid" => current_user.id, "data-rip" => user.id %>
                 </td>
               </tr>
           <% end %>
-
           </tbody>
         </table>
       </div>
-
     </div>
     <hr>
     <h3>Your Conversations</h3>
@@ -41,7 +38,7 @@
             <% @conversations.each do |conversation| %>
                 <li class="media">
                   <div class="media-body">
-                    <%= link_to "", conversation_path(conversation), class: "conversation", "data-cid" => conversation.id %>
+                    <%= link_to "sdasdasd", conversation_path(conversation), class: "conversation", "data-cid" => conversation.id %>
                         <h4 class="media-heading"><%= conversation_interlocutor(conversation).name %></h4>
                         <p><%= conversation.messages.last.nil? ? "No messages" : truncate(conversation.messages.last.body, length: 45) %></p>
                   </div>
