@@ -1,0 +1,139 @@
+From 460482a1957513e3653d7a62521605f85b6a42e9 Mon Sep 17 00:00:00 2001
+From: 1452018 <1452018@github.com>
+Date: Wed, 25 Oct 2017 01:06:31 +0700
+Subject: [PATCH] fix loi css conversation
+
+---
+ .../app/controllers/application_controller.rb      | 11 +++++----
+ namemyapp/app/models/user.rb                       | 26 +++++++++++++++++++++-
+ .../app/views/devise/registrations/edit.html.erb   |  2 +-
+ .../app/views/devise/registrations/new.html.erb    |  1 +
+ namemyapp/app/views/devise/sessions/new.html.erb   |  1 +
+ namemyapp/config/initializers/devise.rb            |  2 +-
+ namemyapp/config/routes.rb                         |  2 +-
+ 7 files changed, 37 insertions(+), 8 deletions(-)
+
+diff --git a/namemyapp/app/controllers/application_controller.rb b/namemyapp/app/controllers/application_controller.rb
+index ed2d83f..7693532 100644
+--- a/namemyapp/app/controllers/application_controller.rb
++++ b/namemyapp/app/controllers/application_controller.rb
+@@ -1,11 +1,14 @@
+ class ApplicationController < ActionController::Base
++
+   protect_from_forgery with: :exception
+   before_action :configure_permitted_parameters, if: :devise_controller?
+ 
+-  protected
++protected
+ 
+-  def configure_permitted_parameters
+-    devise_parameter_sanitizer.for(:sign_up) << :name
+-  end
++def configure_permitted_parameters
++  added_attrs = [:name, :email, :password, :password_confirmation, :remember_me]
++  devise_parameter_sanitizer.permit :sign_up, keys: added_attrs
++  devise_parameter_sanitizer.permit :account_update, keys: added_attrs
++end
+ 
+ end
+diff --git a/namemyapp/app/models/user.rb b/namemyapp/app/models/user.rb
+index 355bc31..d351c05 100644
+--- a/namemyapp/app/models/user.rb
++++ b/namemyapp/app/models/user.rb
+@@ -2,6 +2,30 @@ class User < ApplicationRecord
+   # Include default devise modules. Others available are:
+   # :confirmable, :lockable, :timeoutable and :omniauthable
+   devise :database_authenticatable, :registerable,
+-         :recoverable, :rememberable, :trackable, :validatable
++         :recoverable, :rememberable, :trackable, :validatable,:authentication_keys => [:login]
+   has_many :conversations, :foreign_key => :sender_id
++  validates :name,
++           :presence => true,
++           :uniqueness => {
++             :case_sensitive => false
++           } # etc.
++    attr_accessor :login
++    def self.find_for_database_authentication(warden_conditions)
++     conditions = warden_conditions.dup
++     if login = conditions.delete(:login)
++       where(conditions.to_h).where(["lower(name) = :value OR lower(email) = :value", { :value => login.downcase }]).first
++     elsif conditions.has_
++       key?(:name) || conditions.has_key?(:email)
++       where(conditions.to_h).first
++     end
++   end
++
++   validate :validate_username
++
++   def validate_username
++     if User.where(email: name).exists?
++       errors.add(:name, :invalid)
++     end
++   end
++
+ end
+diff --git a/namemyapp/app/views/devise/registrations/edit.html.erb b/namemyapp/app/views/devise/registrations/edit.html.erb
+index 5db350b..86b6c42 100644
+--- a/namemyapp/app/views/devise/registrations/edit.html.erb
++++ b/namemyapp/app/views/devise/registrations/edit.html.erb
+@@ -5,7 +5,7 @@
+ 
+   <div class="form-inputs">
+     <%= f.input :email, required: true, autofocus: true %>
+-
++     <%= f.input :name, required: true, autofocus: true%>
+     <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+       <p>Currently waiting confirmation for: <%= resource.unconfirmed_email %></p>
+     <% end %>
+diff --git a/namemyapp/app/views/devise/registrations/new.html.erb b/namemyapp/app/views/devise/registrations/new.html.erb
+index 34b4279..fb8fb05 100644
+--- a/namemyapp/app/views/devise/registrations/new.html.erb
++++ b/namemyapp/app/views/devise/registrations/new.html.erb
+@@ -5,6 +5,7 @@
+ 
+   <div class="form-inputs">
+     <%= f.input :email, required: true, autofocus: true %>
++     <%= f.input :name, required: true, autofocus: true%>
+     <%= f.input :password, required: true, hint: ("#{@minimum_password_length} characters minimum" if @minimum_password_length) %>
+     <%= f.input :password_confirmation, required: true %>
+   </div>
+diff --git a/namemyapp/app/views/devise/sessions/new.html.erb b/namemyapp/app/views/devise/sessions/new.html.erb
+index 31f8a4d..6750f50 100644
+--- a/namemyapp/app/views/devise/sessions/new.html.erb
++++ b/namemyapp/app/views/devise/sessions/new.html.erb
+@@ -3,6 +3,7 @@
+ <%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+   <div class="form-inputs">
+     <%= f.input :email, required: false, autofocus: true %>
++    <%= f.input :login, required: false, autofocus: true %>
+     <%= f.input :password, required: false %>
+     <%= f.input :remember_me, as: :boolean if devise_mapping.rememberable? %>
+   </div>
+diff --git a/namemyapp/config/initializers/devise.rb b/namemyapp/config/initializers/devise.rb
+index 733e637..8cddd13 100644
+--- a/namemyapp/config/initializers/devise.rb
++++ b/namemyapp/config/initializers/devise.rb
+@@ -106,7 +106,7 @@ Devise.setup do |config|
+   # algorithm), the cost increases exponentially with the number of stretches (e.g.
+   # a value of 20 is already extremely slow: approx. 60 seconds for 1 calculation).
+   config.stretches = Rails.env.test? ? 1 : 11
+-
++  config.authentication_keys = [ :login ]
+   # Set up a pepper to generate the hashed password.
+   # config.pepper = '48105f09ab588299a0765596a0a2d0a45297e08cdcabdf6bb2d21c746001c19b240aca775b65637adc3a2ef3356ecab76fc47a1a1b7c151733e6ff559828a7b8'
+ 
+diff --git a/namemyapp/config/routes.rb b/namemyapp/config/routes.rb
+index 48237e8..92d793e 100644
+--- a/namemyapp/config/routes.rb
++++ b/namemyapp/config/routes.rb
+@@ -1,6 +1,6 @@
+ Rails.application.routes.draw do
+   #end
+-  devise_for :users #, controllers: {registrations: "registrations"}
++  devise_for :users , controllers: {registrations: "registrations"}
+ 
+   authenticated :user do
+     root 'users#index'
+-- 
+2.11.0
+
