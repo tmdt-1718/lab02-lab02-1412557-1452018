@@ -1,0 +1,406 @@
+From d48f48941f395f8ef519a2b78a7a7e3298173650 Mon Sep 17 00:00:00 2001
+From: 1452018 <1452018@github.com>
+Date: Wed, 25 Oct 2017 22:04:35 +0700
+Subject: [PATCH] fix authentication
+
+---
+ 0001-fix-loi-css-conversation.patch                | 324 +++++++++++++++++++++
+ .../{application.css => application.css.scss}      |   0
+ namemyapp/app/assets/stylesheets/application.scss  |  19 --
+ namemyapp/app/models/user.rb                       |   4 +-
+ namemyapp/app/views/devise/sessions/new.html.erb   |   1 -
+ 5 files changed, 326 insertions(+), 22 deletions(-)
+ create mode 100644 0001-fix-loi-css-conversation.patch
+ rename namemyapp/app/assets/stylesheets/{application.css => application.css.scss} (100%)
+ delete mode 100644 namemyapp/app/assets/stylesheets/application.scss
+
+diff --git a/0001-fix-loi-css-conversation.patch b/0001-fix-loi-css-conversation.patch
+new file mode 100644
+index 0000000..abc738c
+--- /dev/null
++++ b/0001-fix-loi-css-conversation.patch
+@@ -0,0 +1,324 @@
++From e108c99326cba473947599748144ade4eab907b0 Mon Sep 17 00:00:00 2001
++From: 1452018 <1452018@github.com>
++Date: Wed, 25 Oct 2017 01:15:38 +0700
++Subject: [PATCH] fix loi css conversation
++
++---
++ .gitignore                                          | 21 ---------------------
++ namemyapp/app/assets/javascripts/application.js     | 20 ++++++++++----------
++ namemyapp/app/assets/javascripts/chat.js            |  4 ++--
++ ...conversations.coffee => conversations.js.coffee} |  0
++ .../{messages.coffee => messages.js.coffee}         |  0
++ namemyapp/app/assets/javascripts/user.coffee        |  3 ---
++ namemyapp/app/assets/stylesheets/application.css    | 19 +++++++++++++++++++
++ namemyapp/app/assets/stylesheets/application.scss   | 16 ++++++++++++++++
++ .../{conversations.scss => conversations.css.scss}  |  0
++ namemyapp/app/assets/stylesheets/create.js.erb      | 16 ++++++++++++++++
++ .../{messages.scss => messages.css.scss}            |  0
++ .../stylesheets/{user.scss => messags.css.scss}     |  0
++ .../app/controllers/conversations_controller.rb     |  1 -
++ namemyapp/app/helpers/user_helper.rb                |  2 --
++ namemyapp/app/helpers/users_helper.rb               |  3 +++
++ namemyapp/app/models/user.rb                        | 13 +++++++++++++
++ namemyapp/app/views/users/index.html.erb            |  7 ++-----
++ 17 files changed, 81 insertions(+), 44 deletions(-)
++ rename namemyapp/app/assets/javascripts/{conversations.coffee => conversations.js.coffee} (100%)
++ rename namemyapp/app/assets/javascripts/{messages.coffee => messages.js.coffee} (100%)
++ delete mode 100644 namemyapp/app/assets/javascripts/user.coffee
++ create mode 100644 namemyapp/app/assets/stylesheets/application.css
++ rename namemyapp/app/assets/stylesheets/{conversations.scss => conversations.css.scss} (100%)
++ create mode 100644 namemyapp/app/assets/stylesheets/create.js.erb
++ rename namemyapp/app/assets/stylesheets/{messages.scss => messages.css.scss} (100%)
++ rename namemyapp/app/assets/stylesheets/{user.scss => messags.css.scss} (100%)
++ delete mode 100644 namemyapp/app/helpers/user_helper.rb
++
++diff --git a/.gitignore b/.gitignore
++index 42aeb55..be5990d 100644
++--- a/.gitignore
+++++ b/.gitignore
++@@ -11,34 +11,13 @@ capybara-*.html
++ *.orig
++ rerun.txt
++ pickle-email-*.html
++-
++-# TODO Comment out this rule if you are OK with secrets being uploaded to the repo
++ config/initializers/secret_token.rb
++-
++-# Only include if you have production secrets in this file, which is no longer a Rails default
++-# config/secrets.yml
++-
++-# dotenv
++-# TODO Comment out this rule if environment variables can be committed
++ .env
++-
++-## Environment normalization:
++ /.bundle
++ /vendor/bundle
++-
++-# these should all be checked in to normalize the environment:
++-# Gemfile.lock, .ruby-version, .ruby-gemset
++-
++-# unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
++ .rvmrc
++-
++-# if using bower-rails ignore default bower_components path bower.json files
++ /vendor/assets/bower_components
++ *.bowerrc
++ bower.json
++-
++-# Ignore pow environment settings
++ .powenv
++-
++-# Ignore Byebug command history file.
++ .byebug_history
++diff --git a/namemyapp/app/assets/javascripts/application.js b/namemyapp/app/assets/javascripts/application.js
++index 1e285a7..32eabae 100644
++--- a/namemyapp/app/assets/javascripts/application.js
+++++ b/namemyapp/app/assets/javascripts/application.js
++@@ -1,19 +1,19 @@
++ // This is a manifest file that'll be compiled into application.js, which will include all the files
++ // listed below.
++ //
++-// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, or any plugin's
++-// vendor/assets/javascripts directory can be referenced here using a relative path.
+++// Any JavaScript/Coffee file within this directory, lib/assets/javascripts, vendor/assets/javascripts,
+++// or vendor/assets/javascripts of plugins, if any, can be referenced here using a relative path.
++ //
++ // It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
++-// compiled file. JavaScript code in this file should be added after the last require_* statement.
+++// compiled file.
++ //
++-// Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
+++// Read Sprockets README (https://github.com/sstephenson/sprockets#sprockets-directives) for details
++ // about supported directives.
++ //
++-//= require jquery3
++-//= require popper
++-//= require bootstrap-sprockets
++-//= require rails-ujs
++-//= require turbolinks
++-//= require_tree .
+++//= require jquery
+++//= require jquery_ujs
+++//= require bootstrap.min
+++//= require private_pub
++ //= require chat
+++//= require turbolinks
+++//= require_tree 
++diff --git a/namemyapp/app/assets/javascripts/chat.js b/namemyapp/app/assets/javascripts/chat.js
++index 726cba7..3b4d409 100644
++--- a/namemyapp/app/assets/javascripts/chat.js
+++++ b/namemyapp/app/assets/javascripts/chat.js
++@@ -200,7 +200,8 @@ var ready = function () {
++         },
++ 
++         /**
++-         * Responsible for handling minimize and maximize of the chatbox
+++         * Responsible for handling the growth of chatboxes as they increase on the page
+++         * Keeps track of the minimized chatboxes etc
++          *
++          * @param conversation_id
++          */
++@@ -307,4 +308,3 @@ var ready = function () {
++ 
++ $(document).ready(ready);
++ $(document).on("page:load", ready);
++-Raw
++diff --git a/namemyapp/app/assets/javascripts/conversations.coffee b/namemyapp/app/assets/javascripts/conversations.js.coffee
++similarity index 100%
++rename from namemyapp/app/assets/javascripts/conversations.coffee
++rename to namemyapp/app/assets/javascripts/conversations.js.coffee
++diff --git a/namemyapp/app/assets/javascripts/messages.coffee b/namemyapp/app/assets/javascripts/messages.js.coffee
++similarity index 100%
++rename from namemyapp/app/assets/javascripts/messages.coffee
++rename to namemyapp/app/assets/javascripts/messages.js.coffee
++diff --git a/namemyapp/app/assets/javascripts/user.coffee b/namemyapp/app/assets/javascripts/user.coffee
++deleted file mode 100644
++index 24f83d1..0000000
++--- a/namemyapp/app/assets/javascripts/user.coffee
+++++ /dev/null
++@@ -1,3 +0,0 @@
++-# Place all the behaviors and hooks related to the matching controller here.
++-# All this logic will automatically be available in application.js.
++-# You can use CoffeeScript in this file: http://coffeescript.org/
++diff --git a/namemyapp/app/assets/stylesheets/application.css b/namemyapp/app/assets/stylesheets/application.css
++new file mode 100644
++index 0000000..fc2fee9
++--- /dev/null
+++++ b/namemyapp/app/assets/stylesheets/application.css
++@@ -0,0 +1,19 @@
+++/*
+++* This is a manifest file that'll be compiled into application.css, which will include all the files
+++* listed below.
+++*
+++* Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+++* or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+++*
+++* You're free to add application-wide styles to this file and they'll appear at the bottom of the
+++* compiled file so the styles you add here take precedence over styles defined in any styles
+++* defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+++* file per style scope.
+++*
+++*= require_tree .
+++*= require_bootstrap
+++*= require_self
+++*/
+++@import "bootstrap";
+++@import "font-awesome-sprockets";
+++@import "font-awesome";
++diff --git a/namemyapp/app/assets/stylesheets/application.scss b/namemyapp/app/assets/stylesheets/application.scss
++index a6fbf16..fc2fee9 100644
++--- a/namemyapp/app/assets/stylesheets/application.scss
+++++ b/namemyapp/app/assets/stylesheets/application.scss
++@@ -1,3 +1,19 @@
+++/*
+++* This is a manifest file that'll be compiled into application.css, which will include all the files
+++* listed below.
+++*
+++* Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+++* or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+++*
+++* You're free to add application-wide styles to this file and they'll appear at the bottom of the
+++* compiled file so the styles you add here take precedence over styles defined in any styles
+++* defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+++* file per style scope.
+++*
+++*= require_tree .
+++*= require_bootstrap
+++*= require_self
+++*/
++ @import "bootstrap";
++ @import "font-awesome-sprockets";
++ @import "font-awesome";
++diff --git a/namemyapp/app/assets/stylesheets/conversations.scss b/namemyapp/app/assets/stylesheets/conversations.css.scss
++similarity index 100%
++rename from namemyapp/app/assets/stylesheets/conversations.scss
++rename to namemyapp/app/assets/stylesheets/conversations.css.scss
++diff --git a/namemyapp/app/assets/stylesheets/create.js.erb b/namemyapp/app/assets/stylesheets/create.js.erb
++new file mode 100644
++index 0000000..2434403
++--- /dev/null
+++++ b/namemyapp/app/assets/stylesheets/create.js.erb
++@@ -0,0 +1,16 @@
+++<% publish_to @path do %>
+++    var id = "<%= @conversation.id %>";
+++    var chatbox = $("#chatbox_" + id + " .chatboxcontent");
+++    var sender_id = "<%= @message.user.id %>";
+++    var reciever_id = $('meta[name=user-id]').attr("content");
+++
+++    chatbox.append("<%= j render( partial: @message ) %>");
+++    chatbox.scrollTop(chatbox[0].scrollHeight);
+++
+++    if(sender_id != reciever_id){
+++    	chatBox.chatWith(id);
+++        chatbox.children().last().removeClass("self").addClass("other");
+++    	chatbox.scrollTop(chatbox[0].scrollHeight);
+++        chatBox.notify();
+++    }
+++<% end %>
++diff --git a/namemyapp/app/assets/stylesheets/messages.scss b/namemyapp/app/assets/stylesheets/messages.css.scss
++similarity index 100%
++rename from namemyapp/app/assets/stylesheets/messages.scss
++rename to namemyapp/app/assets/stylesheets/messages.css.scss
++diff --git a/namemyapp/app/assets/stylesheets/user.scss b/namemyapp/app/assets/stylesheets/messags.css.scss
++similarity index 100%
++rename from namemyapp/app/assets/stylesheets/user.scss
++rename to namemyapp/app/assets/stylesheets/messags.css.scss
++diff --git a/namemyapp/app/controllers/conversations_controller.rb b/namemyapp/app/controllers/conversations_controller.rb
++index 3590efa..7524930 100644
++--- a/namemyapp/app/controllers/conversations_controller.rb
+++++ b/namemyapp/app/controllers/conversations_controller.rb
++@@ -1,5 +1,4 @@
++ class ConversationsController < ApplicationController
++-  before_filter :authenticate_user!
++ 
++   layout false
++ 
++diff --git a/namemyapp/app/helpers/user_helper.rb b/namemyapp/app/helpers/user_helper.rb
++deleted file mode 100644
++index 0147c3f..0000000
++--- a/namemyapp/app/helpers/user_helper.rb
+++++ /dev/null
++@@ -1,2 +0,0 @@
++-module UserHelper
++-end
++diff --git a/namemyapp/app/helpers/users_helper.rb b/namemyapp/app/helpers/users_helper.rb
++index 2310a24..99f22d2 100644
++--- a/namemyapp/app/helpers/users_helper.rb
+++++ b/namemyapp/app/helpers/users_helper.rb
++@@ -1,2 +1,5 @@
++ module UsersHelper
+++  def conversation_interlocutor(conversation)
+++   conversation.recipient == current_user ? conversation.sender : conversation.recipient
+++ end
++ end
++diff --git a/namemyapp/app/models/user.rb b/namemyapp/app/models/user.rb
++index d351c05..cc46b2d 100644
++--- a/namemyapp/app/models/user.rb
+++++ b/namemyapp/app/models/user.rb
++@@ -10,6 +10,11 @@ class User < ApplicationRecord
++              :case_sensitive => false
++            } # etc.
++     attr_accessor :login
+++
+++
+++
+++
+++
++     def self.find_for_database_authentication(warden_conditions)
++      conditions = warden_conditions.dup
++      if login = conditions.delete(:login)
++@@ -28,4 +33,12 @@ class User < ApplicationRecord
++      end
++    end
++ 
+++   after_create :create_default_conversation
+++   private
+++
+++ # for demo purposes
+++
+++  def create_default_conversation
+++    Conversation.create(sender_id: 1, recipient_id: self.id) unless self.id == 1
+++  end
++ end
++diff --git a/namemyapp/app/views/users/index.html.erb b/namemyapp/app/views/users/index.html.erb
++index 8366536..d0896ae 100644
++--- a/namemyapp/app/views/users/index.html.erb
+++++ b/namemyapp/app/views/users/index.html.erb
++@@ -5,7 +5,6 @@
++       <div class="panel panel-default">
++         <!-- Default panel contents -->
++         <div class="panel-heading">Registered Users</div>
++-
++         <!-- Table -->
++         <table class="table">
++           <thead>
++@@ -22,15 +21,13 @@
++                 <td><%= user.name %></td>
++                 <td>
++                   <%= link_to "Send Message", "#", class: "btn btn-success btn-xs start-conversation",
++-                              "data-sid" => current_user.id, "data-rip" => user.id %>
+++                  "data-sid" => current_user.id, "data-rip" => user.id %>
++                 </td>
++               </tr>
++           <% end %>
++-
++           </tbody>
++         </table>
++       </div>
++-
++     </div>
++     <hr>
++     <h3>Your Conversations</h3>
++@@ -41,7 +38,7 @@
++             <% @conversations.each do |conversation| %>
++                 <li class="media">
++                   <div class="media-body">
++-                    <%= link_to "", conversation_path(conversation), class: "conversation", "data-cid" => conversation.id %>
+++                    <%= link_to "sdasdasd", conversation_path(conversation), class: "conversation", "data-cid" => conversation.id %>
++                         <h4 class="media-heading"><%= conversation_interlocutor(conversation).name %></h4>
++                         <p><%= conversation.messages.last.nil? ? "No messages" : truncate(conversation.messages.last.body, length: 45) %></p>
++                   </div>
++-- 
++2.11.0
++
+diff --git a/namemyapp/app/assets/stylesheets/application.css b/namemyapp/app/assets/stylesheets/application.css.scss
+similarity index 100%
+rename from namemyapp/app/assets/stylesheets/application.css
+rename to namemyapp/app/assets/stylesheets/application.css.scss
+diff --git a/namemyapp/app/assets/stylesheets/application.scss b/namemyapp/app/assets/stylesheets/application.scss
+deleted file mode 100644
+index fc2fee9..0000000
+--- a/namemyapp/app/assets/stylesheets/application.scss
++++ /dev/null
+@@ -1,19 +0,0 @@
+-/*
+-* This is a manifest file that'll be compiled into application.css, which will include all the files
+-* listed below.
+-*
+-* Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+-* or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+-*
+-* You're free to add application-wide styles to this file and they'll appear at the bottom of the
+-* compiled file so the styles you add here take precedence over styles defined in any styles
+-* defined in the other CSS/SCSS files in this directory. It is generally better to create a new
+-* file per style scope.
+-*
+-*= require_tree .
+-*= require_bootstrap
+-*= require_self
+-*/
+-@import "bootstrap";
+-@import "font-awesome-sprockets";
+-@import "font-awesome";
+diff --git a/namemyapp/app/models/user.rb b/namemyapp/app/models/user.rb
+index cc46b2d..4b06737 100644
+--- a/namemyapp/app/models/user.rb
++++ b/namemyapp/app/models/user.rb
+@@ -25,9 +25,9 @@ class User < ApplicationRecord
+      end
+    end
+ 
+-   validate :validate_username
++   validate :validate_name
+ 
+-   def validate_username
++   def validate_name
+      if User.where(email: name).exists?
+        errors.add(:name, :invalid)
+      end
+diff --git a/namemyapp/app/views/devise/sessions/new.html.erb b/namemyapp/app/views/devise/sessions/new.html.erb
+index 6750f50..21cfb45 100644
+--- a/namemyapp/app/views/devise/sessions/new.html.erb
++++ b/namemyapp/app/views/devise/sessions/new.html.erb
+@@ -2,7 +2,6 @@
+ 
+ <%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+   <div class="form-inputs">
+-    <%= f.input :email, required: false, autofocus: true %>
+     <%= f.input :login, required: false, autofocus: true %>
+     <%= f.input :password, required: false %>
+     <%= f.input :remember_me, as: :boolean if devise_mapping.rememberable? %>
+-- 
+2.11.0
+
