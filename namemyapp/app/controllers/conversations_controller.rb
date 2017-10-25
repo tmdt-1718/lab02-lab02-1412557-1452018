@@ -1,8 +1,5 @@
 class ConversationsController < ApplicationController
-<<<<<<< HEAD
-=======
   before_action :authenticate_user!
->>>>>>> refs/remotes/origin/master
 
   layout false
 
