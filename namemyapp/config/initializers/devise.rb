@@ -107,6 +107,10 @@ Devise.setup do |config|
   # a value of 20 is already extremely slow: approx. 60 seconds for 1 calculation).
   config.stretches = Rails.env.test? ? 1 : 11
   config.authentication_keys = [ :login ]
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/master
   # Set up a pepper to generate the hashed password.
   # config.pepper = '48105f09ab588299a0765596a0a2d0a45297e08cdcabdf6bb2d21c746001c19b240aca775b65637adc3a2ef3356ecab76fc47a1a1b7c151733e6ff559828a7b8'
 
